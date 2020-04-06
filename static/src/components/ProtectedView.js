@@ -38,7 +38,7 @@ export default class ProtectedView extends React.Component {
                     <div>
                         <h1>Welcome back,
                             {this.props.data.name}!</h1>
-                        <h1>{this.props.data.email}!</h1>
+                        <h1>{this.props.data.email}</h1>
                     </div>
                 }
             </div>
