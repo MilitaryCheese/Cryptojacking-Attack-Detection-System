@@ -2,6 +2,7 @@ from flask import request, render_template, jsonify, url_for, redirect, g
 from .models import User
 from index import app, db
 from .utils.auth import generate_token, requires_auth, verify_token
+from .components.vm import VirtualMachine
 
 
 @app.route("/", methods=["GET"])
@@ -20,7 +21,6 @@ def get_user():
     userID = g.current_user["id"]
     userValid = get_user_data(userID)
     return jsonify(userValid)
-    # return jsonify(result=g.current_user)
 
 
 @app.route("/api/create_user", methods=["POST"])
@@ -57,15 +57,6 @@ def get_token():
     return jsonify(error=True), 403
 
 
-def get_user_data(userID):
-    print(userID)
-    user = User.get_user_with_id("5e89ce3ac794d322cef787ae")
-    print(user)
-    if user:
-        return user
-    return jsonify(error=True), 403
-
-
 @app.route("/api/is_token_valid", methods=["POST"])
 def is_token_valid():
     incoming = request.get_json()
@@ -75,3 +66,20 @@ def is_token_valid():
         return jsonify(token_is_valid=True)
     else:
         return jsonify(token_is_valid=False), 403
+
+
+def get_user_data(userID):
+    user = User.get_user_with_id(userID)
+
+    # additional stuff
+    # server1 = VirtualMachine("kjaya", "localhost", 2223, False)
+    server1 = VirtualMachine("keshinijaya", "35.226.234.198", 22, True)
+    server1.setKeyFilename("application/components/keyfiles/test-key")
+    server1.launchThread()
+    # server1.startDetection()
+    print(server1.getStatus())
+    # server1.stopDetect()
+    # additional stuff
+    if user:
+        return user
+    return jsonify(error=True), 403
