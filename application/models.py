@@ -28,3 +28,28 @@ class User(db.Document):
             self.password = bcrypt.generate_password_hash(self.password).decode("utf-8")
             print(self.password)
         super(User, self).save(*args, **kwargs)
+
+
+class Server(db.Document):
+    userID = db.StringField(max_length=255, required=True)
+    hostname = db.StringField(max_length=255, unique=True)
+    port = db.IntField(max_length=255, required=True)  # change
+    username = db.StringField(max_length=255, required=True)
+    password = db.StringField(max_length=255, required=True)
+    key_filename = db.StringField(max_length=255, required=True)
+    isDetecting = db.BooleanField(default=False, required=True)
+
+    @staticmethod
+    def get_server_with_id(id):
+        server = Server.objects.get(id=id)
+        if server:
+            return server
+        else:
+            return None
+
+    def save(self, *args, **kwargs):
+
+        # if not self.id and self.password:
+        #     self.password = bcrypt.generate_password_hash(self.password).decode("utf-8")
+        #     print(self.password)
+        super(Server, self).save(*args, **kwargs)

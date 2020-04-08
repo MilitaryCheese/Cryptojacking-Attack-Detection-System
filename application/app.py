@@ -1,5 +1,5 @@
 from flask import request, render_template, jsonify, url_for, redirect, g
-from .models import User
+from .models import User, Server
 from index import app, db
 from .utils.auth import generate_token, requires_auth, verify_token
 from .components.vm import VirtualMachine
@@ -71,15 +71,64 @@ def is_token_valid():
 def get_user_data(userID):
     user = User.get_user_with_id(userID)
 
-    # additional stuff
-    # server1 = VirtualMachine("kjaya", "localhost", 2223, False)
-    server1 = VirtualMachine("keshinijaya", "35.226.234.198", 22, True)
-    server1.setKeyFilename("application/components/keyfiles/test-key")
-    server1.launchThread()
-    # server1.startDetection()
-    print(server1.getStatus())
-    # server1.stopDetect()
-    # additional stuff
+    # # additional stuff
+    # # server1 = VirtualMachine("kjaya", "localhost", 2223, False)
+    # server1 = VirtualMachine("keshinijaya", "35.226.234.198", 22, True)
+    # server1.setKeyFilename("application/components/keyfiles/test-key")
+    # server1.launchThread()
+    # # server1.startDetection()
+    # print(server1.getStatus())
+    # # server1.stopDetect()
+    # # additional stuff
+
     if user:
         return user
     return jsonify(error=True), 403
+
+
+# ------------- SERVER RELATED API ROUTES ------------------
+@app.route("/api/create_server", methods=["POST"])
+def create_server():
+    try:
+        incoming = request.get_json()
+        userID = incoming["userID"]
+        hostname = incoming["hostname"]
+        port = incoming["port"]  # should be an integer
+        username = incoming["username"]
+        password = incoming["password"]
+        key_filename = incoming["key_filename"]
+
+    except:
+        return jsonify()
+
+    if password == "":
+        testServer = VirtualMachine(username, hostname, port, True)
+        testServer.setKeyFilename(key_filename)
+    else:
+        testServer = VirtualMachine(username, hostname, port, False)
+        testServer.setPassword(password)
+    isConnected = testServer.testServer()
+    print(isConnected)
+    if isConnected:
+        print("1")
+        s = Server(
+            userID=userID,
+            hostname=hostname,
+            port=port,
+            username=username,
+            password=password,
+            key_filename=key_filename,
+        )
+        try:
+            s.save()
+        except db.NotUniqueError:
+            return jsonify(message="Server already exists"), 410
+        return jsonify(status=True)
+    else:
+        print("2")
+        return (
+            jsonify(
+                message="Cannot establish connection to server. Please check your credentials."
+            ),
+            412,
+        )
