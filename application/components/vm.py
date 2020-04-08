@@ -141,27 +141,3 @@ class VirtualMachine:
         server_thread.start()
         print("Ending thread...")
         return "done"
-
-    def testServer(self):
-        # need try catching system
-        client = paramiko.SSHClient()
-        client.load_system_host_keys()
-        try:
-            if self.using_key:
-                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                client.connect(
-                    hostname=self.hostname,
-                    port=self.port,
-                    username=self.username,
-                    key_filename=self.key_filename,
-                )
-            else:
-                client.connect(
-                    hostname=self.hostname,
-                    port=self.port,
-                    username=self.username,
-                    password=self.password,
-                )
-        except:
-            return False
-        return True

@@ -43,15 +43,3 @@ export function has_github_token(token) {
 export function data_about_user(token) {
     return axios.get('api/user', tokenConfig(token));
 }
-
-// --------- SERVER FUNCTIONS -------------
-export function create_server(userID, hostname, port, username, password, key_filename) {
-    return axios.post('api/create_server', {
-        userID,
-        hostname,
-        port,
-        username,
-        password,
-        key_filename
-    });
-}
