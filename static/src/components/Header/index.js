@@ -1,14 +1,14 @@
-import React, { Component } from 'react';
-import { browserHistory } from 'react-router';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import AppBar from 'material-ui/AppBar';
-import LeftNav from 'material-ui/Drawer';
-import MenuItem from 'material-ui/MenuItem';
-import FlatButton from 'material-ui/FlatButton';
-import Divider from 'material-ui/Divider';
+import React, { Component } from "react";
+import { browserHistory } from "react-router";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import AppBar from "material-ui/AppBar";
+import LeftNav from "material-ui/Drawer";
+import MenuItem from "material-ui/MenuItem";
+import FlatButton from "material-ui/FlatButton";
+import Divider from "material-ui/Divider";
 
-import * as actionCreators from '../../actions/auth';
+import * as actionCreators from "../../actions/auth";
 
 function mapStateToProps(state) {
     return {
@@ -29,7 +29,6 @@ export class Header extends Component {
         this.state = {
             open: false,
         };
-
     }
 
     dispatchNewRoute(route) {
@@ -37,16 +36,13 @@ export class Header extends Component {
         this.setState({
             open: false,
         });
-
     }
-
 
     handleClickOutside() {
         this.setState({
             open: false,
         });
     }
-
 
     logout(e) {
         e.preventDefault();
@@ -66,38 +62,54 @@ export class Header extends Component {
         return (
             <header>
                 <LeftNav open={this.state.open}>
-                    {
-                        !this.props.isAuthenticated ?
-                            <div>
-                                <MenuItem onClick={() => this.dispatchNewRoute('/login')}>
-                                    Login
-                                </MenuItem>
-                                <MenuItem onClick={() => this.dispatchNewRoute('/register')}>
-                                    Register
-                                </MenuItem>
-                            </div>
-                            :
-                            <div>
-                                <MenuItem onClick={() => this.dispatchNewRoute('/analytics')}>
-                                    Analytics
-                                </MenuItem>
-                                <Divider />
+                    {!this.props.isAuthenticated ? (
+                        <div>
+                            <MenuItem
+                                onClick={() => this.dispatchNewRoute("/login")}
+                            >
+                                Login
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() =>
+                                    this.dispatchNewRoute("/register")
+                                }
+                            >
+                                Register
+                            </MenuItem>
+                        </div>
+                    ) : (
+                        <div>
+                            <MenuItem
+                                onClick={() => this.dispatchNewRoute("/main")}
+                            >
+                                Detection
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() =>
+                                    this.dispatchNewRoute("/create-server")
+                                }
+                            >
+                                Create Server
+                            </MenuItem>
+                            <Divider />
 
-                                <MenuItem onClick={(e) => this.logout(e)}>
-                                    Logout
-                                </MenuItem>
-                            </div>
-                    }
+                            <MenuItem onClick={(e) => this.logout(e)}>
+                                Logout
+                            </MenuItem>
+                        </div>
+                    )}
                 </LeftNav>
                 <AppBar
-                  title="React-Redux-Flask"
-                  onLeftIconButtonTouchTap={() => this.openNav()}
-                  iconElementRight={
-                      <FlatButton label="Home" onClick={() => this.dispatchNewRoute('/')} />
+                    title="Cryptojacking Attack Detection System"
+                    onLeftIconButtonTouchTap={() => this.openNav()}
+                    iconElementRight={
+                        <FlatButton
+                            label="Home"
+                            onClick={() => this.dispatchNewRoute("/")}
+                        />
                     }
                 />
             </header>
-
         );
     }
 }

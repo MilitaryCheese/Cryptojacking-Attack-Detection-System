@@ -1,8 +1,16 @@
 from flask import request, render_template, jsonify, url_for, redirect, g
-from .models import User
+from .models import User, Server
 from index import app, db
 from .utils.auth import generate_token, requires_auth, verify_token
 from .components.vm import VirtualMachine
+from bson import json_util
+import json
+
+import warnings
+
+warnings.filterwarnings("ignore")
+
+current_detecting_servers = []
 
 
 @app.route("/", methods=["GET"])
@@ -69,17 +77,163 @@ def is_token_valid():
 
 
 def get_user_data(userID):
-    user = User.get_user_with_id(userID)
 
-    # additional stuff
-    # server1 = VirtualMachine("kjaya", "localhost", 2223, False)
-    server1 = VirtualMachine("keshinijaya", "35.226.234.198", 22, True)
-    server1.setKeyFilename("application/components/keyfiles/test-key")
-    server1.launchThread()
-    # server1.startDetection()
-    print(server1.getStatus())
-    # server1.stopDetect()
-    # additional stuff
+    user = User.get_user_with_id(userID)
     if user:
         return user
     return jsonify(error=True), 403
+
+
+# ------------- SERVER RELATED API ROUTES ------------------
+@app.route("/api/create_server", methods=["POST"])
+def create_server():
+    try:
+        incoming = request.get_json()
+        userID = incoming["userID"]
+        hostname = incoming["hostname"]
+        port = incoming["port"]  # should be an integer
+        username = incoming["username"]
+        password = incoming["password"]
+        key_filename = incoming["key_filename"]
+
+    except:
+        return jsonify()
+
+    if password == "":
+        testServer = VirtualMachine(username, hostname, port, True)
+        testServer.setKeyFilename(key_filename)
+    else:
+        testServer = VirtualMachine(username, hostname, port, False)
+        testServer.setPassword(password)
+    print("Testing...")
+    isConnected = testServer.testServer()
+    print(isConnected)
+    if isConnected:
+        print("1")
+        s = Server(
+            userID=userID,
+            hostname=hostname,
+            port=port,
+            username=username,
+            password=password,
+            key_filename=key_filename,
+        )
+        try:
+            s.save()
+        except db.NotUniqueError:
+            return jsonify(message="Server already exists"), 410
+        return jsonify(status=True)
+    else:
+        print("2")
+        return (
+            jsonify(
+                message="Cannot establish connection to server. Please check your credentials."
+            ),
+            412,
+        )
+
+
+@app.route("/api/servers_with_user", methods=["POST"])
+def servers_with_user():
+    try:
+        incoming = request.get_json()
+        userID = incoming["userID"]
+        servers = Server.get_servers_with_user_id(userID)
+    except Exception as e:
+        print(e)
+        return jsonify(message="Error: " + e), 411
+
+    return jsonify(servers)
+
+
+@app.route("/api/detect_server", methods=["POST"])
+def detect_server():
+    try:
+        incoming = request.get_json()
+        userID = incoming["userID"]
+        hostname = incoming["hostname"]
+        port = incoming["port"]
+        username = incoming["username"]
+        password = incoming["password"]
+        key_filename = incoming["key_filename"]
+    except Exception as e:
+        return jsonify(error=e)
+
+    if password == "":
+        # use key filename
+        server_instant = VirtualMachine(username, hostname, port, True)
+        server_instant.setKeyFilename(key_filename)
+        isConnected = server_instant.testServer()
+    else:
+        print("pass")
+        # use password
+        server_instant = VirtualMachine(username, hostname, port, False)
+        server_instant.setPassword(password)
+        isConnected = server_instant.testServer()
+
+    print(isConnected)
+    if isConnected:
+        # start detecting
+        server_instant.launchThread()
+        print(server_instant.getStatus())
+        # add to current detecting server list
+        print("Current servers:")
+        current_detecting_servers.append(server_instant)
+
+        # update server status on database
+        try:
+            Server.objects(userID=userID).update(isDetecting="True",)
+        except Exception as e:
+            print(e)
+    else:
+        return (
+            jsonify(
+                message="Cannot establish connection to server. Please ensure that the server is online."
+            ),
+            413,
+        )
+
+    print("Detecting server...")
+    return jsonify(error=False)
+
+
+@app.route("/api/get_detection_status", methods=["POST"])
+def get_detection_status():
+    try:
+        incoming = request.get_json()
+        hostname = incoming["hostname"]
+    except Exception as e:
+        return jsonify(error=e)
+
+    try:
+        running_server = [
+            x for x in current_detecting_servers if x.hostname == hostname
+        ][0]
+        return jsonify(status=running_server.getStatus())
+    except IndexError:
+        return jsonify(status="Server not running")
+
+
+@app.route("/api/stop_server_detect", methods=["POST"])
+def stop_server_detect():
+    print("stoping server...")
+    try:
+        incoming = request.get_json()
+        hostname = incoming["hostname"]
+    except Exception as e:
+        return jsonify(error=e)
+
+    try:
+        running_server = [
+            x for x in current_detecting_servers if x.hostname == hostname
+        ][0]
+        running_server.stopDetect()
+        current_detecting_servers.remove(running_server)
+        # update server status on database
+        try:
+            Server.objects(hostname=hostname).update(isDetecting="False",)
+        except Exception as e:
+            print(e)
+        return jsonify(stopStatus="success")
+    except IndexError:
+        return jsonify(status="Server not running")

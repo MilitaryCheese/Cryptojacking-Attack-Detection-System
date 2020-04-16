@@ -29,6 +29,7 @@ class VirtualMachine:
         self.key_filename = key_filename
 
     def stopDetect(self):
+        print("inside stop detect")
         self.stop_detect = True
 
     def getStatus(self):
@@ -56,6 +57,7 @@ class VirtualMachine:
         rep_count = 0
         metric_count = 18  # last metric index 20
         stdout_arr = []
+        predicted_values = 0
 
         # connect to server via SSH
         client = paramiko.SSHClient()
@@ -124,6 +126,9 @@ class VirtualMachine:
                 # assign value to current status
                 self.current_status = predicted_values[0]
 
+                # if predicted value == 1 
+                # send email to user as a notification
+
                 # break
 
                 # it will only run once
@@ -141,3 +146,31 @@ class VirtualMachine:
         server_thread.start()
         print("Ending thread...")
         return "done"
+
+    def testServer(self):
+        # need try catching system
+        client = paramiko.SSHClient()
+        client.load_system_host_keys()
+        try:
+            if self.using_key:
+                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                client.connect(
+                    hostname=self.hostname,
+                    port=self.port,
+                    username=self.username,
+                    key_filename=self.key_filename,
+                )
+            else:
+                try:
+                    client.connect(
+                        hostname=self.hostname,
+                        port=self.port,
+                        username=self.username,
+                        password=self.password,
+                    )
+                except:
+                    print("not working")
+                    return False
+        except:
+            return False
+        return True

@@ -1,5 +1,24 @@
 :global(body) {
-  position: relative;
+    position: relative;
+}
 
+.label-data {
+    font-weight: 500;
+}
 
+.priorityBtn {
+    button {
+        background-color: red !important;
+    }
+}
+
+.dashboard-content {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    .content-status {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
 }
