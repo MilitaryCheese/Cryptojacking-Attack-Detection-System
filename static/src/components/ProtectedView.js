@@ -8,7 +8,10 @@ import Paper from "material-ui/Paper";
 import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 
-import { get_detection_status } from "../utils/http_functions";
+import {
+    get_detection_status,
+    get_analytics_data,
+} from "../utils/http_functions";
 import Analytics from "./Analytics";
 
 function mapStateToProps(state) {
@@ -57,6 +60,49 @@ const style = {
     width: "100%",
     display: "inline-block",
 };
+
+function getChartParams(analyticsData) {
+    var labelColumns = [];
+    for (var i = 0; i < analyticsData.user.length; i++) {
+        var value = analyticsData.user[i][0];
+        labelColumns.push(new Date(value).toLocaleString()); // can edit the time from here
+    }
+    console.log(labelColumns);
+    var dataColumns = [];
+    for (var i = 0; i < analyticsData.user.length; i++) {
+        var value = analyticsData.user[i][1];
+        dataColumns.push(value);
+    }
+    console.log(dataColumns);
+
+    var data = {
+        labels: labelColumns,
+        datasets: [
+            {
+                label: "CPU History Analytics",
+                fill: false,
+                lineTension: 0.1,
+                backgroundColor: "rgba(75,192,192,0.4)",
+                borderColor: "rgba(75,192,192,1)",
+                borderCapStyle: "butt",
+                borderDash: [],
+                borderDashOffset: 0.0,
+                borderJoinStyle: "miter",
+                pointBorderColor: "rgba(75,192,192,1)",
+                pointBackgroundColor: "#fff",
+                pointBorderWidth: 1,
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                pointHoverBorderColor: "rgba(220,220,220,1)",
+                pointHoverBorderWidth: 2,
+                pointRadius: 1,
+                pointHitRadius: 10,
+                data: dataColumns,
+            },
+        ],
+    };
+    return data;
+}
 
 @connect(mapStateToProps, mapDispatchToProps)
 export default class ProtectedView extends React.Component {
@@ -117,20 +163,6 @@ export default class ProtectedView extends React.Component {
             this.setState({
                 currentDetectionStatuses: currentDetectionStatuses1,
             });
-
-            //~~ remove this later
-            // setInterval(() => {
-            //     var runningServers = this.props.usersServers.filter((obj) => {
-            //         return obj.isDetecting == "True";
-            //     });
-
-            //     var currentDetectionStatuses1 = getStatusesContinuously(
-            //         runningServers
-            //     );
-            //     this.setState({
-            //         currentDetectionStatuses: currentDetectionStatuses1,
-            //     });
-            // }, 5000);
         }
     }
 
@@ -196,6 +228,27 @@ export default class ProtectedView extends React.Component {
             currentServerUsername: this.props.usersServers[value].username,
             currentServerHostname: this.props.usersServers[value].hostname,
             currentServerPort: this.props.usersServers[value].port,
+        });
+
+        get_analytics_data(
+            this.props.usersServers[value].hostname,
+            this.props.usersServers[value].port,
+            this.props.usersServers[value].username,
+            this.props.usersServers[value].password,
+            this.props.usersServers[value].key_filename
+        ).then((result) => {
+            console.log(result);
+            if (result.data.error) {
+                this.setState({
+                    analyticsParams: result.data,
+                });
+            } else {
+                var status = result.data.analytics;
+                var analyticsParams = getChartParams(status);
+                this.setState({
+                    analyticsParams: analyticsParams,
+                });
+            }
         });
     };
 
@@ -342,80 +395,94 @@ export default class ProtectedView extends React.Component {
                                     Select a server ...
                                 </p>
                             ) : (
-                                <div className="dashboard-content">
-                                    <div className="content-details">
-                                        <div>
+                                <div className="dynamic-data-area">
+                                    <div className="dashboard-content">
+                                        <div className="content-details">
+                                            <div>
+                                                <p>
+                                                    <span className="label-data">
+                                                        Username:{" "}
+                                                    </span>
+                                                    {
+                                                        this.state
+                                                            .currentServerUsername
+                                                    }
+                                                </p>
+                                                <p>
+                                                    <span className="label-data">
+                                                        Hostname:{" "}
+                                                    </span>
+                                                    {
+                                                        this.state
+                                                            .currentServerHostname
+                                                    }
+                                                </p>
+                                                <p>
+                                                    <span className="label-data">
+                                                        Port:{" "}
+                                                    </span>
+                                                    {
+                                                        this.state
+                                                            .currentServerPort
+                                                    }
+                                                </p>
+                                                <RaisedButton
+                                                    label="Start Detecting"
+                                                    primary={true}
+                                                    style={{ marginTop: 20 }}
+                                                    onClick={(e) =>
+                                                        this.detect_server(e)
+                                                    }
+                                                />
+                                                <br />
+                                                <RaisedButton
+                                                    label="Stop detection"
+                                                    primary={true}
+                                                    className="priorityBtn"
+                                                    style={{ marginTop: 20 }}
+                                                    onClick={(e) =>
+                                                        this.stop_detection(e)
+                                                    }
+                                                />
+                                                <br />
+                                                <br />
+                                            </div>
+                                        </div>
+
+                                        <div className="content-status">
                                             <p>
                                                 <span className="label-data">
-                                                    Username:{" "}
+                                                    Status:{" "}
                                                 </span>
-                                                {
-                                                    this.state
-                                                        .currentServerUsername
-                                                }
-                                            </p>
-                                            <p>
-                                                <span className="label-data">
-                                                    Hostname:{" "}
-                                                </span>
-                                                {
-                                                    this.state
-                                                        .currentServerHostname
-                                                }
-                                            </p>
-                                            <p>
-                                                <span className="label-data">
-                                                    Port:{" "}
-                                                </span>
-                                                {this.state.currentServerPort}
+                                                {this.props
+                                                    .currentServerCurrentStatus ==
+                                                0 ? (
+                                                    <span>False</span>
+                                                ) : (
+                                                    <span>True</span>
+                                                )}
                                             </p>
                                             <RaisedButton
-                                                label="Start Detecting"
-                                                primary={true}
+                                                label="Get status"
                                                 style={{ marginTop: 20 }}
                                                 onClick={(e) =>
-                                                    this.detect_server(e)
+                                                    this.get_detection_status(e)
                                                 }
                                             />
-                                            <br />
-                                            <RaisedButton
-                                                label="Stop detection"
-                                                primary={true}
-                                                className="priorityBtn"
-                                                style={{ marginTop: 20 }}
-                                                onClick={(e) =>
-                                                    this.stop_detection(e)
-                                                }
-                                            />
-                                            <br />
-                                            <br />
                                         </div>
                                     </div>
-
-                                    <div className="content-status">
-                                        <p>
-                                            <span className="label-data">
-                                                Status:{" "}
-                                            </span>
-                                            {this.props
-                                                .currentServerCurrentStatus ==
-                                            0 ? (
-                                                <span>False</span>
-                                            ) : (
-                                                <span>True</span>
-                                            )}
-                                        </p>
-                                        <RaisedButton
-                                            label="Get status"
-                                            style={{ marginTop: 20 }}
-                                            onClick={(e) =>
-                                                this.get_detection_status(e)
-                                            }
-                                        />
+                                    <div className="analytics-content">
+                                        {this.state.analyticsParams ? (
+                                            <Analytics
+                                                {...this.state.analyticsParams}
+                                                type="line"
+                                            />
+                                        ) : (
+                                            <p>Loading ... </p>
+                                        )}
                                     </div>
                                 </div>
                             )}
-                            <Analytics />
                         </div>
                     </Paper>
                 </div>
@@ -434,6 +501,7 @@ ProtectedView.propTypes = {
     createServer: React.PropTypes.func,
     detectServer: React.PropTypes.func,
     getDetectionStatus: React.PropTypes.func,
+    getAnalyticsGraphData: React.PropTypes.func,
     stopServerDetect: React.PropTypes.func,
     createServerStatusText: React.PropTypes.string,
 };

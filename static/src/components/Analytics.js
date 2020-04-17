@@ -16,7 +16,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 const data = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
     datasets: [
         {
             label: "My First dataset",
@@ -42,15 +42,52 @@ const data = {
     ],
 };
 
+var chartData = {};
+var error = null;
+
 @connect(mapStateToProps, mapDispatchToProps)
 class Analytics extends React.Component {
-    // eslint-disable-line react/prefer-stateless-function
+    constructor(props) {
+        super(props);
+        error = false;
+        console.log(this.props);
+        if (this.props.error) {
+            error = true;
+            console.log("error: " + error);
+        } else {
+            chartData = {
+                labels: this.props.labels,
+                datasets: this.props.datasets,
+            };
+            error = false;
+        }
+        console.log(chartData);
+    }
+
+    componentDidUpdate() {
+        console.log("analytics updated");
+        if (this.props.error) {
+            error = true;
+            console.log("error: " + error);
+        } else {
+            chartData = {
+                labels: this.props.labels,
+                datasets: this.props.datasets,
+            };
+            error = false;
+        }
+    }
+
     render() {
         return (
             <div className="col-md-8">
                 <h1>Analytics</h1>
-                <hr />
-                <Line data={data} />
+                <p>{error}</p>
+                {this.props.error ? (
+                    <p>{this.props.error}</p>
+                ) : (
+                    <Line data={chartData} />
+                )}
             </div>
         );
     }

@@ -3,6 +3,7 @@ from .models import User, Server
 from index import app, db
 from .utils.auth import generate_token, requires_auth, verify_token
 from .components.vm import VirtualMachine
+from .components.analytics_graph import AnalyticsGraph
 from bson import json_util
 import json
 
@@ -171,6 +172,10 @@ def detect_server():
         server_instant.setPassword(password)
         isConnected = server_instant.testServer()
 
+    # get user email
+    userEmail = get_user_data(userID).email
+    server_instant.setUserEmail(userEmail)
+
     print(isConnected)
     if isConnected:
         # start detecting
@@ -237,3 +242,52 @@ def stop_server_detect():
         return jsonify(stopStatus="success")
     except IndexError:
         return jsonify(status="Server not running")
+
+
+@app.route("/api/get_analytics_data", methods=["POST"])
+def get_analytics_data():
+    print("start")
+    try:
+        incoming = request.get_json()
+        hostname = incoming["hostname"]
+        port = incoming["port"]
+        username = incoming["username"]
+        password = incoming["password"]
+        key_filename = incoming["key_filename"]
+
+        print(hostname)
+        print(port)
+        print(username)
+        print(password)
+        print(key_filename)
+
+    except Exception as e:
+        print(e)
+
+    if password == "":
+        # use key filename
+        server_instant = VirtualMachine(username, hostname, port, True)
+        server_instant.setKeyFilename(key_filename)
+        isConnected = server_instant.testServer()
+    else:
+        print("pass")
+        # use password
+        server_instant = VirtualMachine(username, hostname, port, False)
+        server_instant.setPassword(password)
+        isConnected = server_instant.testServer()
+
+    print(isConnected)
+    if isConnected:
+
+        analyticsGraph = AnalyticsGraph(server_instant)
+        analytics_data = analyticsGraph.getCPUAnalyticsData()
+        analytics_data = json.loads(analytics_data)
+        print("analytics are taken")
+        return jsonify(analytics=analytics_data)
+        # print(analyticsGraph)
+    else:
+        return (
+            jsonify(
+                error="Cannot establish connection to server. Please ensure that the server is online."
+            ),
+        )

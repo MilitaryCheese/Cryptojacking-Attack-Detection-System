@@ -98,3 +98,19 @@ export function stop_server_detect(hostname) {
         hostname,
     });
 }
+
+export function get_analytics_data(
+    hostname,
+    port,
+    username,
+    password,
+    key_filename
+) {
+    return axios.post("api/get_analytics_data", {
+        hostname,
+        port,
+        username,
+        password,
+        key_filename,
+    });
+}

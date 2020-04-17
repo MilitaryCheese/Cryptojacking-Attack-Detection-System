@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.naive_bayes import GaussianNB
 from base64 import decodebytes
 import threading
+from application.utils.email_sender import EmailSender
 
 nb_classifier = pd.read_pickle("application/components/NB_classifier.pkl")
 
@@ -21,12 +22,16 @@ class VirtualMachine:
         self.key_filename = "none"
         self.current_status = 0
         self.stop_detect = False
+        self.userEmail = ""
 
     def setPassword(self, password):
         self.password = password
 
     def setKeyFilename(self, key_filename):
         self.key_filename = key_filename
+
+    def setUserEmail(self, userEmail):
+        self.userEmail = userEmail
 
     def stopDetect(self):
         print("inside stop detect")
@@ -58,6 +63,8 @@ class VirtualMachine:
         metric_count = 18  # last metric index 20
         stdout_arr = []
         predicted_values = 0
+
+        email_status = False
 
         # connect to server via SSH
         client = paramiko.SSHClient()
@@ -126,8 +133,10 @@ class VirtualMachine:
                 # assign value to current status
                 self.current_status = predicted_values[0]
 
-                # if predicted value == 1 
+                # if predicted value == 1
                 # send email to user as a notification
+                if predicted_values == 1 and email_status == False:
+                    email_status = self.sendEmailNotification()
 
                 # break
 
@@ -146,6 +155,12 @@ class VirtualMachine:
         server_thread.start()
         print("Ending thread...")
         return "done"
+
+    def sendEmailNotification(self):
+        print("Sending email...")
+        email = EmailSender(self.userEmail, self.hostname)
+        email.sendNotificationEmail()
+        return True
 
     def testServer(self):
         # need try catching system
