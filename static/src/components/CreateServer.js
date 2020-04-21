@@ -42,6 +42,7 @@ class CreateServer extends React.Component {
         this.state = {
             userID: "",
             hostname: "",
+            serverName: "",
             port: "",
             username: "",
             password: "",
@@ -69,7 +70,8 @@ class CreateServer extends React.Component {
             this.state.port,
             this.state.username,
             this.state.password,
-            this.state.key_filename
+            this.state.key_filename,
+            this.state.serverName
         );
     }
 
@@ -115,6 +117,14 @@ class CreateServer extends React.Component {
             <div className="col-md-8">
                 <h1>Add Server to your Account</h1>
                 <hr />
+                <div className="col-md-12">
+                    <TextField
+                        hintText="Sever Name"
+                        floatingLabelText="Server Name"
+                        type="text"
+                        onChange={(e) => this.changeValue(e, "serverName")}
+                    />
+                </div>
                 <div className="col-md-12">
                     <TextField
                         hintText="Hostname"

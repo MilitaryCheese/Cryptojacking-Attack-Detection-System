@@ -94,7 +94,8 @@ export function createServer(
     port,
     username,
     password,
-    key_filename
+    key_filename,
+    serverName
 ) {
     return function (dispatch) {
         dispatch(createServerRequest());
@@ -104,7 +105,8 @@ export function createServer(
             port,
             username,
             password,
-            key_filename
+            key_filename,
+            serverName
         )
             .then(parseJSON)
             .then((response) => {

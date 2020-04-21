@@ -23,14 +23,15 @@ function mapStateToProps(state) {
         createServerStatusText: state.data.createServerStatusText,
         usersServers: state.data.usersServers,
         currentServerCurrentStatus: state.data.currentServerCurrentStatus,
+        currentDetectionStatuses: state.currentDetectionStatuses,
     };
 }
 
 function getStatusesContinuously(runningServers) {
+    console.log("continious detection started...");
     var currentDetectionStatuses1 = {};
 
     runningServers.forEach((item) => {
-        console.log("host name:");
         var hostnm = item.hostname;
         get_detection_status(hostnm).then((result) => {
             var status = result.data.status;
@@ -121,9 +122,11 @@ export default class ProtectedView extends React.Component {
             isCurrentServerSelected: false,
             currentServerIdx: 0,
             currentServerUsername: null,
+            currentServerName: null,
             currentServerHostname: null,
             currentServerPort: null,
             currentServerCurrentStatus: null,
+            currentServerIsDetecting: null,
             fetchServerData: false,
             monitoring: false,
             currentDetectionStatuses: null,
@@ -153,23 +156,38 @@ export default class ProtectedView extends React.Component {
                 monitoring: true,
             });
 
-            var runningServers = this.props.usersServers.filter((obj) => {
-                return obj.isDetecting == "True";
-            });
+            setInterval(() => {
+                var runningServers = this.props.usersServers.filter((obj) => {
+                    return obj.isDetecting == "True";
+                });
 
-            var currentDetectionStatuses1 = getStatusesContinuously(
-                runningServers
-            );
-            this.setState({
-                currentDetectionStatuses: currentDetectionStatuses1,
-            });
+                var currentDetectionStatuses1 = getStatusesContinuously(
+                    runningServers
+                );
+                this.setState({
+                    currentDetectionStatuses: currentDetectionStatuses1,
+                });
+                console.log("manually getting status");
+                this.props.getDetectionStatus(this.state.currentServerHostname);
+            }, 5000);
+
+            // var runningServers = this.props.usersServers.filter((obj) => {
+            //     return obj.isDetecting == "True";
+            // });
+
+            // var currentDetectionStatuses1 = getStatusesContinuously(
+            //     runningServers
+            // );
+            // this.setState({
+            //     currentDetectionStatuses: currentDetectionStatuses1,
+            // });
         }
     }
 
     createServerSelectData() {
-        let serverNameList = this.props.usersServers.map((a) => a.hostname);
-        const serverMenuList = serverNameList.map((hostname, idx) => {
-            return <MenuItem key={idx} value={idx} primaryText={hostname} />;
+        let serverNameList = this.props.usersServers.map((a) => a.serverName);
+        const serverMenuList = serverNameList.map((serverName, idx) => {
+            return <MenuItem key={idx} value={idx} primaryText={serverName} />;
         });
         return serverMenuList;
     }
@@ -198,6 +216,9 @@ export default class ProtectedView extends React.Component {
             this.props.usersServers[this.state.currentServerIdx].password,
             this.props.usersServers[this.state.currentServerIdx].key_filename
         );
+        this.setState({
+            currentServerIsDetecting: "True",
+        });
     }
 
     get_detection_status(e) {
@@ -210,6 +231,9 @@ export default class ProtectedView extends React.Component {
         e.preventDefault();
         console.log("Stop detection");
         this.props.stopServerDetect(this.state.currentServerHostname);
+        this.setState({
+            currentServerIsDetecting: "False",
+        });
     }
 
     changeValue(e, type) {
@@ -226,8 +250,11 @@ export default class ProtectedView extends React.Component {
             currentServerIdx: value,
             isCurrentServerSelected: true,
             currentServerUsername: this.props.usersServers[value].username,
+            currentServerName: this.props.usersServers[value].serverName,
             currentServerHostname: this.props.usersServers[value].hostname,
             currentServerPort: this.props.usersServers[value].port,
+            currentServerIsDetecting: this.props.usersServers[value]
+                .isDetecting,
         });
 
         get_analytics_data(
@@ -292,12 +319,6 @@ export default class ProtectedView extends React.Component {
                                 Welcome back,&nbsp;
                                 {this.props.data.name}!
                             </h1>
-                            <h2>Heading 2</h2>
-                            <h3>Heading 3</h3>
-                            <h4>Heading 4</h4>
-                            <h5>Heading 5</h5>
-                            <h6>Heading 6</h6>
-                            <p>Paragraph</p>
                         </div>
                     )}
                 </div>
@@ -373,7 +394,7 @@ export default class ProtectedView extends React.Component {
                 </div>
                 <div>
                     <Paper style={style}>
-                        <div>
+                        <div className="detection-area">
                             <h2 className="text-center">Detection Dashboard</h2>
                             <div className="col-md-12">
                                 {!this.props.loaded ? (
@@ -428,6 +449,11 @@ export default class ProtectedView extends React.Component {
                                                 </p>
                                                 <RaisedButton
                                                     label="Start Detecting"
+                                                    disabled={
+                                                        this.state
+                                                            .currentServerIsDetecting ==
+                                                        "True"
+                                                    }
                                                     primary={true}
                                                     style={{ marginTop: 20 }}
                                                     onClick={(e) =>
@@ -437,6 +463,11 @@ export default class ProtectedView extends React.Component {
                                                 <br />
                                                 <RaisedButton
                                                     label="Stop detection"
+                                                    disabled={
+                                                        this.state
+                                                            .currentServerIsDetecting ==
+                                                        "False"
+                                                    }
                                                     primary={true}
                                                     className="priorityBtn"
                                                     style={{ marginTop: 20 }}
@@ -456,11 +487,33 @@ export default class ProtectedView extends React.Component {
                                                 </span>
                                                 {this.props
                                                     .currentServerCurrentStatus ==
-                                                0 ? (
-                                                    <span>False</span>
-                                                ) : (
-                                                    <span>True</span>
+                                                    null && (
+                                                    <span>Loading ... </span>
                                                 )}
+                                                {this.props
+                                                    .currentServerCurrentStatus ==
+                                                    undefined && (
+                                                    <span>Loading ... </span>
+                                                )}
+                                                {this.props
+                                                    .currentServerCurrentStatus ==
+                                                    "requesting" && (
+                                                    <span>Requesting ... </span>
+                                                )}
+                                                {this.props
+                                                    .currentServerCurrentStatus ==
+                                                    "Server not running" && (
+                                                    <span>
+                                                        Server not running{" "}
+                                                    </span>
+                                                )}
+
+                                                {this.props
+                                                    .currentServerCurrentStatus ==
+                                                    0 && <span>False </span>}
+                                                {this.props
+                                                    .currentServerCurrentStatus ==
+                                                    1 && <span>True </span>}
                                             </p>
                                             <RaisedButton
                                                 label="Get status"

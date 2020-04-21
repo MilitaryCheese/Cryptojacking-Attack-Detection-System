@@ -12,6 +12,11 @@
     }
 }
 
+.detection-area {
+    display: flex;
+    flex-direction: column;
+}
+
 .dynamic-data-area {
     display: flex;
     flex-direction: column;

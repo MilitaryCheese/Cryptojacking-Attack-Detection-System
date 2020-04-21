@@ -40,7 +40,7 @@ class Server(db.Document):
     password = db.StringField(max_length=255, required=True)
     key_filename = db.StringField(max_length=255, required=True)
     isDetecting = db.StringField(max_length=255, required=True)
-    # isDetecting = db.BooleanField(default=False, required=True)
+    serverName = db.StringField(max_length=255, required=True)
 
     @staticmethod
     def get_server_with_id(id):

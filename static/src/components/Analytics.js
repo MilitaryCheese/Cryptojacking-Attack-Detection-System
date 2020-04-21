@@ -80,7 +80,7 @@ class Analytics extends React.Component {
 
     render() {
         return (
-            <div className="col-md-8">
+            <div>
                 <h1>Analytics</h1>
                 <p>{error}</p>
                 {this.props.error ? (

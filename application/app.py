@@ -96,6 +96,8 @@ def create_server():
         username = incoming["username"]
         password = incoming["password"]
         key_filename = incoming["key_filename"]
+        isDetecting = "False"
+        serverName = incoming["serverName"]
 
     except:
         return jsonify()
@@ -107,7 +109,8 @@ def create_server():
         testServer = VirtualMachine(username, hostname, port, False)
         testServer.setPassword(password)
     print("Testing...")
-    isConnected = testServer.testServer()
+    # isConnected = testServer.testServer()
+    isConnected = True
     print(isConnected)
     if isConnected:
         print("1")
@@ -118,6 +121,8 @@ def create_server():
             username=username,
             password=password,
             key_filename=key_filename,
+            isDetecting=isDetecting,
+            serverName=serverName,
         )
         try:
             s.save()

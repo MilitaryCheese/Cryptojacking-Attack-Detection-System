@@ -69,6 +69,8 @@ class VirtualMachine:
         # connect to server via SSH
         client = paramiko.SSHClient()
         client.load_system_host_keys()
+
+        # conditionally verifying the connection method - password or via private key
         if self.using_key:
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(
@@ -87,7 +89,9 @@ class VirtualMachine:
 
         # create command
         glances_cmd = (
-            "glances --stdout cpu.idle,cpu.total,cpu.user,fs,load.min1,load.min5,load.min15,mem.active,mem.available,mem.buffers,mem.cached,mem.inactive,mem.percent,network,percpu,processcount.sleeping,processcount.thread,processcount.total -t "
+            "glances --stdout cpu.idle,cpu.total,cpu.user,fs,load.min1,load.min5,"
+            + "load.min15,mem.active,mem.available,mem.buffers,mem.cached,mem.inactive,"
+            + "mem.percent,network,percpu,processcount.sleeping,processcount.thread,processcount.total -t "
             + str(detect_time_gap)
         )
 
@@ -97,9 +101,14 @@ class VirtualMachine:
         # gather multiple data
         for line in stdout:
             output_line = line.strip("\n")
+
+            # retrieving the f/s percent value from given array
             if rep_count == 3:
+                # stripping the given string value to retrieve the f/s percent value
                 fs_percent_val = VirtualMachine.findvalue("percent", output_line)
                 stdout_arr.append(float(fs_percent_val[1]))
+
+            # retrieving the network cumulative and updated values
             elif rep_count == 13:
                 network_lo_cumulative_cx = VirtualMachine.findvalue(
                     "cumulative_cx", output_line
@@ -109,6 +118,8 @@ class VirtualMachine:
                 )
                 stdout_arr.append(float(network_lo_cumulative_cx[1]))
                 stdout_arr.append(float(network_lo_time_since_update[1]))
+
+            # retrieving the percpu values from the array (system, total and user)
             elif rep_count == 14:
                 percpu_system = VirtualMachine.findvalue("system", output_line)
                 percpu_total = VirtualMachine.findvalue("total", output_line)
@@ -116,33 +127,35 @@ class VirtualMachine:
                 stdout_arr.append(float(percpu_system[1]))
                 stdout_arr.append(float(percpu_total[1]))
                 stdout_arr.append(float(percpu_user[1]))
+
+            # if no array values are given, directly strip the given string to obtain the value
             else:
                 output_line = output_line.split(" ", 1)
                 floatVal = float(output_line[1])
                 stdout_arr.append(floatVal)
             rep_count = rep_count + 1
+
+            # conditionally verifying that the end of the retrieval of a sngle set of attributes and values
             if rep_count >= metric_count:
-                # stdout_arr is data
+                # converting the retrieved values to array of float
                 data_sample = np.asarray(stdout_arr, dtype=np.float32)
                 data_sample = np.reshape(data_sample, (1, -1))
 
-                # send data to model
+                # send data to the imported Gaussian Naive Bayes classifier
                 predicted_values = nb_classifier.predict(data_sample)
-                print("Status: " + str(predicted_values))
-                # print("Stop detect: " + str(self.stopDetect))
+
                 # assign value to current status
                 self.current_status = predicted_values[0]
+                print("Status of " + self.hostname + ": " + str(self.current_status))
 
-                # if predicted value == 1
-                # send email to user as a notification
+                # send email to user as a notification if the attack status is true
                 if predicted_values == 1 and email_status == False:
                     email_status = self.sendEmailNotification()
 
-                # break
-
-                # it will only run once
+                # resetting logic variables
                 rep_count = 0
                 stdout_arr = []
+
             if self.stop_detect:
                 break
 
@@ -150,10 +163,11 @@ class VirtualMachine:
         return predicted_values
 
     def launchThread(self):
+        # creating thread object with the function start detection
         server_thread = threading.Thread(target=self.startDetection, daemon=True)
-        print("Before starting thread...")
+        print("Starting thread...")
+        # starting thread
         server_thread.start()
-        print("Ending thread...")
         return "done"
 
     def sendEmailNotification(self):

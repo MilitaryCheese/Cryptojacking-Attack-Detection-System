@@ -51,7 +51,8 @@ export function create_server(
     port,
     username,
     password,
-    key_filename
+    key_filename,
+    serverName
 ) {
     return axios.post("api/create_server", {
         userID,
@@ -60,6 +61,7 @@ export function create_server(
         username,
         password,
         key_filename,
+        serverName,
     });
 }
 

@@ -10,6 +10,7 @@ class AnalyticsGraph:
     def __init__(self, vm_instance):
         self.vm_instance = vm_instance
 
+    # connecting to the user servers via PARAMIKO
     def connectToClient(self):
         client = paramiko.SSHClient()
         client.load_system_host_keys()
@@ -31,10 +32,12 @@ class AnalyticsGraph:
             )
         return client
 
+    # execute glances web server
     def hostGlancesServer(self):
         stdin, stdout, stderr = self.client.exec_command("glances -w")
         return stdout
 
+    # execute curl command to retrieve data
     def curlAnalyticsData(self):
         cmd = "curl http://localhost:61208/api/3/cpu/user/history/20"
         stdin, stdout, stderr = self.client.exec_command(cmd)
@@ -45,9 +48,12 @@ class AnalyticsGraph:
             break
         return output
 
+    # main function used to retrieve the historic & current CPU data
     def getCPUAnalyticsData(self):
+        # connects to client
         self.client = self.connectToClient()
+        # executes the web server
         x = self.hostGlancesServer()
-        print("connected...")
+        # get past and current data
         analytics_data = self.curlAnalyticsData()
         return analytics_data

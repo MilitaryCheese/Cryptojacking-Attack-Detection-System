@@ -7,8 +7,10 @@ class EmailSender:
         self.hostname = hostname
 
     def sendNotificationEmail(self):
-        port = 587  # For starttls
+        # For starttls
+        port = 587
         smtp_server = "smtp.gmail.com"
+        # senders email address
         sender_email = "cadsystemnotifier@gmail.com"
         receiver_email = self.userEmail
         password = "1997KeshiniJaya"
@@ -18,7 +20,9 @@ class EmailSender:
 
         Your server with the hostname of """
             + self.hostname
-            + """ might be under a cryptojacking attack! Recommended action to be taken:  ."""
+            + """ might be under a cryptojacking attack! Recommended action to be taken: 
+                1) Manually identify the underlying miner and use process ID to terminate it
+                2) Shut down the server if no critical applications are being sent."""
         )
 
         context = ssl.create_default_context()
@@ -27,4 +31,8 @@ class EmailSender:
             server.starttls(context=context)
             server.ehlo()  # Can be omitted
             server.login(sender_email, password)
+            # sending a notification email to the given address variables
             server.sendmail(sender_email, receiver_email, message)
+
+
+# 1997KeshiniJaya"
