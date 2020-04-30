@@ -49,8 +49,10 @@ var error = null;
 class Analytics extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            chartData: {},
+        };
         error = false;
-        console.log(this.props);
         if (this.props.error) {
             error = true;
             console.log("error: " + error);
@@ -61,11 +63,9 @@ class Analytics extends React.Component {
             };
             error = false;
         }
-        console.log(chartData);
     }
 
     componentDidUpdate() {
-        console.log("analytics updated");
         if (this.props.error) {
             error = true;
             console.log("error: " + error);
@@ -76,6 +76,22 @@ class Analytics extends React.Component {
             };
             error = false;
         }
+        if (chartData.labels == this.state.chartData.labels) {
+            //dont update
+        } else {
+            this.setState({
+                chartData: chartData,
+            });
+            console.log("update");
+        }
+    }
+
+    componentDidMount() {
+        this.setState({
+            chartData: chartData,
+        });
+
+        console.log(this.state.chartData);
     }
 
     render() {
@@ -86,7 +102,7 @@ class Analytics extends React.Component {
                 {this.props.error ? (
                     <p>{this.props.error}</p>
                 ) : (
-                    <Line data={chartData} />
+                    <Line data={this.state.chartData} />
                 )}
             </div>
         );

@@ -62,6 +62,18 @@ const style = {
     display: "inline-block",
 };
 
+const errorNot = {
+    marginTop: 20,
+    paddingBottom: 10,
+    paddingTop: 10,
+    paddingLeft: 50,
+    paddingRight: 50,
+    width: "100%",
+    display: "inline-block",
+    backgroundColor: "#f3797b",
+    color: "white",
+};
+
 function getChartParams(analyticsData) {
     var labelColumns = [];
     for (var i = 0; i < analyticsData.user.length; i++) {
@@ -101,6 +113,7 @@ function getChartParams(analyticsData) {
                 data: dataColumns,
             },
         ],
+        update: true,
     };
     return data;
 }
@@ -130,11 +143,16 @@ export default class ProtectedView extends React.Component {
             fetchServerData: false,
             monitoring: false,
             currentDetectionStatuses: null,
+            alertOnce: false,
+            alertHost: null,
         };
     }
 
     componentDidMount() {
         this.fetchData();
+        // this.setState({
+        //     usersServers: this.props.usersServers,
+        // });
     }
 
     fetchData() {
@@ -160,27 +178,38 @@ export default class ProtectedView extends React.Component {
                 var runningServers = this.props.usersServers.filter((obj) => {
                     return obj.isDetecting == "True";
                 });
-
+                console.log(runningServers);
+                if (runningServers.length > 0) {
+                    console.log("should detect servers now");
+                }
                 var currentDetectionStatuses1 = getStatusesContinuously(
                     runningServers
                 );
+
                 this.setState({
                     currentDetectionStatuses: currentDetectionStatuses1,
                 });
                 console.log("manually getting status");
                 this.props.getDetectionStatus(this.state.currentServerHostname);
             }, 5000);
-
-            // var runningServers = this.props.usersServers.filter((obj) => {
-            //     return obj.isDetecting == "True";
-            // });
-
-            // var currentDetectionStatuses1 = getStatusesContinuously(
-            //     runningServers
-            // );
-            // this.setState({
-            //     currentDetectionStatuses: currentDetectionStatuses1,
-            // });
+        }
+        if (
+            this.state.currentDetectionStatuses != null &&
+            this.state.alertOnce == false
+        ) {
+            for (let k in this.state.currentDetectionStatuses) {
+                if (this.state.currentDetectionStatuses[k] === 1) {
+                    console.log("jackpot");
+                    console.log(k);
+                    var result = this.props.usersServers.filter((obj) => {
+                        return obj.hostname === k;
+                    });
+                    this.setState({
+                        alertOnce: true,
+                        alertHost: result[0],
+                    });
+                }
+            }
         }
     }
 
@@ -219,6 +248,7 @@ export default class ProtectedView extends React.Component {
         this.setState({
             currentServerIsDetecting: "True",
         });
+        this.props.fetchServerData(this.props.data._id.$oid);
     }
 
     get_detection_status(e) {
@@ -234,6 +264,7 @@ export default class ProtectedView extends React.Component {
         this.setState({
             currentServerIsDetecting: "False",
         });
+        this.props.fetchServerData(this.props._id.$oid);
     }
 
     changeValue(e, type) {
@@ -322,76 +353,34 @@ export default class ProtectedView extends React.Component {
                         </div>
                     )}
                 </div>
-                <div>
-                    <Paper style={style}>
-                        <div className="text-center">
-                            <h2>Add a server to your account</h2>
-                            {this.props.createServerStatusText && (
-                                <div className="alert alert-info">
-                                    {this.props.createServerStatusText}
+                {this.state.alertOnce && (
+                    <div>
+                        <Paper style={errorNot}>
+                            <div className="error-notification">
+                                <img
+                                    src="/src/img/alert-icon.svg"
+                                    className="alert-icon"
+                                ></img>
+                                <div>
+                                    <h3 className="text-center">
+                                        Crptojacking attack detected in{" "}
+                                        {this.state.alertHost.serverName}
+                                    </h3>
+                                    <p className="text-center">
+                                        If the infected machine doesn't contain
+                                        important data or services, consider
+                                        shutting down the services and reseting
+                                        the server.
+                                    </p>
                                 </div>
-                            )}
-
-                            <div className="col-md-12">
-                                <TextField
-                                    hintText="Hostname"
-                                    floatingLabelText="Hostname"
-                                    type="text"
-                                    errorText={this.state.hostname_error_text}
-                                    onChange={(e) =>
-                                        this.changeValue(e, "hostname")
-                                    }
-                                />
+                                <img
+                                    src="/src/img/alert-icon.svg"
+                                    className="alert-icon"
+                                ></img>
                             </div>
-                            <div className="col-md-12">
-                                <TextField
-                                    hintText="Port"
-                                    floatingLabelText="Port"
-                                    type="number"
-                                    onChange={(e) =>
-                                        this.changeValue(e, "port")
-                                    }
-                                />
-                            </div>
-                            <div className="col-md-12">
-                                <TextField
-                                    hintText="Username"
-                                    floatingLabelText="Username"
-                                    type="text"
-                                    onChange={(e) =>
-                                        this.changeValue(e, "username")
-                                    }
-                                />
-                            </div>
-                            <div className="col-md-12">
-                                <TextField
-                                    hintText="Password"
-                                    floatingLabelText="Password"
-                                    type="password"
-                                    onChange={(e) =>
-                                        this.changeValue(e, "password")
-                                    }
-                                />
-                            </div>
-                            <div className="col-md-12">
-                                <TextField
-                                    hintText="Key Location"
-                                    floatingLabelText="Key Location"
-                                    type="text"
-                                    onChange={(e) =>
-                                        this.changeValue(e, "key_filename")
-                                    }
-                                />
-                            </div>
-                            <RaisedButton
-                                disabled={this.state.disabled}
-                                style={{ marginTop: 50 }}
-                                label="Create Server"
-                                onClick={(e) => this.create_server(e)}
-                            />
-                        </div>
-                    </Paper>
-                </div>
+                        </Paper>
+                    </div>
+                )}
                 <div>
                     <Paper style={style}>
                         <div className="detection-area">
@@ -485,15 +474,11 @@ export default class ProtectedView extends React.Component {
                                                 <span className="label-data">
                                                     Status:{" "}
                                                 </span>
+
                                                 {this.props
                                                     .currentServerCurrentStatus ==
                                                     null && (
-                                                    <span>Loading ... </span>
-                                                )}
-                                                {this.props
-                                                    .currentServerCurrentStatus ==
-                                                    undefined && (
-                                                    <span>Loading ... </span>
+                                                    <span>No status</span>
                                                 )}
                                                 {this.props
                                                     .currentServerCurrentStatus ==

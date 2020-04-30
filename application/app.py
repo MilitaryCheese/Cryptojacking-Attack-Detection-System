@@ -6,7 +6,7 @@ from .components.vm import VirtualMachine
 from .components.analytics_graph import AnalyticsGraph
 from bson import json_util
 import json
-
+import random
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -98,6 +98,7 @@ def create_server():
         key_filename = incoming["key_filename"]
         isDetecting = "False"
         serverName = incoming["serverName"]
+        glancesPort = str(random.randint(61211, 61299))
 
     except:
         return jsonify()
@@ -109,8 +110,8 @@ def create_server():
         testServer = VirtualMachine(username, hostname, port, False)
         testServer.setPassword(password)
     print("Testing...")
-    # isConnected = testServer.testServer()
-    isConnected = True
+    isConnected = testServer.testServer()
+    # isConnected = True
     print(isConnected)
     if isConnected:
         print("1")
@@ -123,6 +124,7 @@ def create_server():
             key_filename=key_filename,
             isDetecting=isDetecting,
             serverName=serverName,
+            glancesPort=glancesPort,
         )
         try:
             s.save()
@@ -192,7 +194,8 @@ def detect_server():
 
         # update server status on database
         try:
-            Server.objects(userID=userID).update(isDetecting="True",)
+            Server.objects(hostname=hostname).update(isDetecting="True")
+            print("server")
         except Exception as e:
             print(e)
     else:
@@ -283,9 +286,11 @@ def get_analytics_data():
 
     print(isConnected)
     if isConnected:
-
-        analyticsGraph = AnalyticsGraph(server_instant)
+        server = get_server_data(hostname)
+        print(server.glancesPort)
+        analyticsGraph = AnalyticsGraph(server_instant, server.glancesPort)
         analytics_data = analyticsGraph.getCPUAnalyticsData()
+        print(analytics_data)
         analytics_data = json.loads(analytics_data)
         print("analytics are taken")
         return jsonify(analytics=analytics_data)
@@ -296,3 +301,10 @@ def get_analytics_data():
                 error="Cannot establish connection to server. Please ensure that the server is online."
             ),
         )
+
+
+def get_server_data(hostname):
+    server = Server.get_server_with_hostname(hostname)
+    if server:
+        return server
+    return jsonify(error=True), 403

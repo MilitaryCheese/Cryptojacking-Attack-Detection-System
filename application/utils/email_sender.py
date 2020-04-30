@@ -21,8 +21,10 @@ class EmailSender:
         Your server with the hostname of """
             + self.hostname
             + """ might be under a cryptojacking attack! Recommended action to be taken: 
-                1) Manually identify the underlying miner and use process ID to terminate it
-                2) Shut down the server if no critical applications are being sent."""
+                1) If no network-critical applications are currently running, please consider shutting down the network.
+                2) Use the command 'ps -aux' to locate applications that you do not recognize.
+                3) Consider shutting down applications that are suspicious and/or foriegn that you think are not critical. Use the command 'kill [pid]' to kill any process.
+                4) If the issue persists, please consider rebooting the server."""
         )
 
         context = ssl.create_default_context()

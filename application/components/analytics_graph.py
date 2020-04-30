@@ -7,8 +7,9 @@ from flask import jsonify
 
 
 class AnalyticsGraph:
-    def __init__(self, vm_instance):
+    def __init__(self, vm_instance, portno):
         self.vm_instance = vm_instance
+        self.portno = portno
 
     # connecting to the user servers via PARAMIKO
     def connectToClient(self):
@@ -34,18 +35,19 @@ class AnalyticsGraph:
 
     # execute glances web server
     def hostGlancesServer(self):
-        stdin, stdout, stderr = self.client.exec_command("glances -w")
+        stdin, stdout, stderr = self.client.exec_command("glances -w -p " + self.portno)
         return stdout
 
     # execute curl command to retrieve data
     def curlAnalyticsData(self):
-        cmd = "curl http://localhost:61208/api/3/cpu/user/history/20"
+        cmd = "curl http://localhost:" + self.portno + "/api/3/cpu/user/history/20"
         stdin, stdout, stderr = self.client.exec_command(cmd)
         output = ""
         for line in stdout:
             output_line = line.strip("\n")
             output = output_line
             break
+        self.client.close()
         return output
 
     # main function used to retrieve the historic & current CPU data

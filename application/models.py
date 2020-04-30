@@ -41,10 +41,19 @@ class Server(db.Document):
     key_filename = db.StringField(max_length=255, required=True)
     isDetecting = db.StringField(max_length=255, required=True)
     serverName = db.StringField(max_length=255, required=True)
+    glancesPort = db.StringField(max_length=255, required=False)
 
     @staticmethod
     def get_server_with_id(id):
         server = Server.objects.get(id=id)
+        if server:
+            return server
+        else:
+            return None
+
+    @staticmethod
+    def get_server_with_hostname(hostname):
+        server = Server.objects.get(hostname=hostname)
         if server:
             return server
         else:
