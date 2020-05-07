@@ -95,17 +95,17 @@ function getChartParams(analyticsData) {
                 label: "CPU History Analytics",
                 fill: false,
                 lineTension: 0.1,
-                backgroundColor: "rgba(75,192,192,0.4)",
-                borderColor: "rgba(75,192,192,1)",
+                backgroundColor: "rgba(255, 119, 0,0.4)",
+                borderColor: "rgba(255, 119, 0)",
                 borderCapStyle: "butt",
                 borderDash: [],
                 borderDashOffset: 0.0,
                 borderJoinStyle: "miter",
-                pointBorderColor: "rgba(75,192,192,1)",
+                pointBorderColor: "rgba(255, 119, 0,1)",
                 pointBackgroundColor: "#fff",
                 pointBorderWidth: 1,
                 pointHoverRadius: 5,
-                pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                pointHoverBackgroundColor: "rgba(255, 119, 0,1)",
                 pointHoverBorderColor: "rgba(220,220,220,1)",
                 pointHoverBorderWidth: 2,
                 pointRadius: 1,
@@ -174,24 +174,26 @@ export default class ProtectedView extends React.Component {
                 monitoring: true,
             });
 
-            setInterval(() => {
-                var runningServers = this.props.usersServers.filter((obj) => {
-                    return obj.isDetecting == "True";
-                });
-                console.log(runningServers);
-                if (runningServers.length > 0) {
-                    console.log("should detect servers now");
-                }
-                var currentDetectionStatuses1 = getStatusesContinuously(
-                    runningServers
-                );
+            //~~
+            // setInterval(() => {
+            //     var runningServers = this.props.usersServers.filter((obj) => {
+            //         return obj.isDetecting == "True";
+            //     });
+            //     console.log(runningServers);
+            //     if (runningServers.length > 0) {
+            //         console.log("should detect servers now");
+            //     }
+            //     var currentDetectionStatuses1 = getStatusesContinuously(
+            //         runningServers
+            //     );
 
-                this.setState({
-                    currentDetectionStatuses: currentDetectionStatuses1,
-                });
-                console.log("manually getting status");
-                this.props.getDetectionStatus(this.state.currentServerHostname);
-            }, 5000);
+            //     this.setState({
+            //         currentDetectionStatuses: currentDetectionStatuses1,
+            //     });
+            //     console.log("manually getting status");
+            //     this.props.getDetectionStatus(this.state.currentServerHostname);
+            // }, 5000);
+            //~
         }
         if (
             this.state.currentDetectionStatuses != null &&
@@ -382,7 +384,7 @@ export default class ProtectedView extends React.Component {
                     </div>
                 )}
                 <div>
-                    <Paper style={style}>
+                    <Paper className="main-area" style={style}>
                         <div className="detection-area">
                             <h2 className="text-center">Detection Dashboard</h2>
                             <div className="col-md-12">
@@ -390,6 +392,7 @@ export default class ProtectedView extends React.Component {
                                     <h1>Loading data...</h1>
                                 ) : (
                                     <SelectField
+                                        className="server-name-txt"
                                         hintText="Server name"
                                         value={this.state.currentServerIdx}
                                         floatingLabelText="Server Name"
@@ -445,6 +448,7 @@ export default class ProtectedView extends React.Component {
                                                     }
                                                     primary={true}
                                                     style={{ marginTop: 20 }}
+                                                    className="green-btn"
                                                     onClick={(e) =>
                                                         this.detect_server(e)
                                                     }

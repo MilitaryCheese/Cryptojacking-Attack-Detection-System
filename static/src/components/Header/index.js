@@ -6,6 +6,7 @@ import AppBar from "material-ui/AppBar";
 import LeftNav from "material-ui/Drawer";
 import MenuItem from "material-ui/MenuItem";
 import FlatButton from "material-ui/FlatButton";
+import FontIcon from "material-ui/FontIcon";
 import Divider from "material-ui/Divider";
 
 import * as actionCreators from "../../actions/auth";
@@ -21,6 +22,10 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators(actionCreators, dispatch);
 }
+
+const appbarStyle = {
+    backgroundColor: "#2d364d",
+};
 
 @connect(mapStateToProps, mapDispatchToProps)
 export class Header extends Component {
@@ -61,7 +66,7 @@ export class Header extends Component {
     render() {
         return (
             <header>
-                <LeftNav open={this.state.open}>
+                <LeftNav className="left-nav" open={this.state.open}>
                     {!this.props.isAuthenticated ? (
                         <div>
                             <MenuItem
@@ -91,9 +96,12 @@ export class Header extends Component {
                             >
                                 Create Server
                             </MenuItem>
-                            <Divider />
+                            <Divider className="left-nav-div" />
 
-                            <MenuItem onClick={(e) => this.logout(e)}>
+                            <MenuItem
+                                className="logout-btn"
+                                onClick={(e) => this.logout(e)}
+                            >
                                 Logout
                             </MenuItem>
                         </div>
@@ -101,13 +109,10 @@ export class Header extends Component {
                 </LeftNav>
                 <AppBar
                     title="Cryptojacking Attack Detection System"
+                    style={appbarStyle}
+                    className="app-bar"
                     onLeftIconButtonTouchTap={() => this.openNav()}
-                    iconElementRight={
-                        <FlatButton
-                            label="Home"
-                            onClick={() => this.dispatchNewRoute("/")}
-                        />
-                    }
+                    iconClassNameRight="crypto-icon"
                 />
             </header>
         );

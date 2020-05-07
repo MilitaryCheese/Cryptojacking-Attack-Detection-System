@@ -119,6 +119,7 @@ class CreateServer extends React.Component {
                 <hr />
                 <div className="col-md-12">
                     <TextField
+                        className="add-server-txts"
                         hintText="Sever Name"
                         floatingLabelText="Server Name"
                         type="text"
@@ -127,6 +128,7 @@ class CreateServer extends React.Component {
                 </div>
                 <div className="col-md-12">
                     <TextField
+                        className="add-server-txts"
                         hintText="Hostname"
                         floatingLabelText="Hostname"
                         type="text"
@@ -136,6 +138,7 @@ class CreateServer extends React.Component {
                 </div>
                 <div className="col-md-12">
                     <TextField
+                        className="add-server-txts"
                         hintText="Port"
                         floatingLabelText="Port"
                         type="number"
@@ -144,6 +147,7 @@ class CreateServer extends React.Component {
                 </div>
                 <div className="col-md-12">
                     <TextField
+                        className="add-server-txts"
                         hintText="Username"
                         floatingLabelText="Username"
                         type="text"
@@ -152,6 +156,7 @@ class CreateServer extends React.Component {
                 </div>
                 <div className="col-md-12">
                     <TextField
+                        className="add-server-txts"
                         hintText="Password"
                         floatingLabelText="Password"
                         type="password"
@@ -160,6 +165,7 @@ class CreateServer extends React.Component {
                 </div>
                 <div className="col-md-12">
                     <TextField
+                        className="add-server-txts"
                         hintText="Key Location"
                         floatingLabelText="Key Location"
                         type="text"

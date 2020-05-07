@@ -90,11 +90,13 @@ def test_server_connection_module():
     print("testing server connection module")
     t1 = test_connect_to_server(1)
     t10 = test_connect_to_server(10)
-    # test_connect_to_server(50)
-    # test_connect_to_server(100)
+    t50 = test_connect_to_server(50)
+    t100 = test_connect_to_server(100)
 
     print("Server connection - 1: ", t1)
     print("Server connection - 10: ", t10)
+    print("Server connection - 50: ", t50)
+    print("Server connection - 100: ", t100)
 
 
 # ---------------------------------------------------------------
@@ -130,11 +132,13 @@ def test_command_exec_module():
     print("testing command execution module")
     t1 = test_command_execute(1)
     t10 = test_command_execute(10)
-    # test_command_execute(50)
-    # test_command_execute(100)
+    t50 = test_command_execute(50)
+    t100 = test_command_execute(100)
 
     print("Command execution - 1: ", t1)
     print("Command execution - 10: ", t10)
+    print("Command execution - 50: ", t50)
+    print("Command execution - 100: ", t100)
 
 
 # ---------------------------------------------------------------
@@ -164,11 +168,15 @@ def test_detection_module():
     print("testing detection module")
     t1 = test_detect_attack(1)
     t10 = test_detect_attack(10)
+    t50 = test_detect_attack(50)
+    t100 = test_detect_attack(100)
     # test_detect_attack(50)
     # test_detect_attack(100)
 
     print("Attack detection - 1: ", t1)
     print("Attack detection - 10: ", t10)
+    print("Attack detection - 10: ", t50)
+    print("Attack detection - 10: ", t100)
 
 
 # ---------------------------------------------------------------
@@ -209,11 +217,15 @@ def test_thread_module():
     print("testing thread module")
     t1 = test_threading(1)
     t10 = test_threading(10)
+    t50 = test_threading(50)
+    t100 = test_threading(100)
     # test_threading(50)
     # test_threading(100)
 
     print("Threading - 1: ", t1)
     print("Threading - 10: ", t10)
+    print("Threading - 50: ", t50)
+    print("Threading - 100: ", t100)
 
 
 # ---------------------------------------------------------------

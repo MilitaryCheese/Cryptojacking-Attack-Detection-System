@@ -40,3 +40,112 @@
         margin: 10px;
     }
 }
+
+.left-nav {
+    div {
+        background-color: #2d364d !important;
+        color: white;
+
+        hr {
+            background-color: "red";
+        }
+    }
+}
+
+.main-container {
+    background-color: #353e5a;
+    margin: unset !important;
+    width: auto !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+p {
+    color: white !important;
+}
+
+.main-area {
+    background-color: #2d364d !important;
+    .server-name-txt {
+        label {
+            color: white !important;
+        }
+        div {
+            color: white !important;
+        }
+    }
+}
+
+.login-container,
+.reg-container {
+    background-color: #2d364d !important;
+}
+
+input {
+    color: white !important;
+}
+
+.add-server-txts {
+    label {
+        color: white !important;
+    }
+    div {
+        color: white !important;
+    }
+}
+
+.act-btn {
+    button {
+        background-color: #ff7800 !important;
+    }
+}
+
+footer {
+    background-color: #2d364d !important;
+}
+
+.app-bar {
+    h1 {
+        color: #ff7800 !important;
+    }
+    button:nth-child(3) {
+        // background-color: red !important;
+        background-image: url("https://i.imgur.com/K0lRJa7.png") !important;
+        width: 45px !important;
+        height: 45px !important;
+        background-size: 45px 45px !important;
+        margin-right: 3px !important;
+    }
+}
+
+.crypto-icon {
+    width: 120px;
+    height: 31px;
+}
+
+.logout-btn {
+    div {
+        div {
+            color: #ff7800 !important;
+        }
+    }
+}
+
+.green-btn {
+    button {
+        background-color: #9bc82f !important;
+        color: rgba(75, 192, 192, 1);
+    }
+}
+
+.chartjs-size-monitor {
+    background-color: white !important;
+}
+
+canvas {
+    border-radius: 5px !important;
+    background: #e1e4e8 !important;
+}

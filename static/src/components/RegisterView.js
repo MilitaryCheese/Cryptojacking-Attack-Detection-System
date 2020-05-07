@@ -123,7 +123,7 @@ export default class RegisterView extends React.Component {
                 className="col-md-6 col-md-offset-3"
                 onKeyPress={(e) => this._handleKeyPress(e)}
             >
-                <Paper style={style}>
+                <Paper style={style} className="reg-container">
                     <div className="text-center">
                         <h2>Register to view protected content!</h2>
                         {this.props.registerStatusText && (
@@ -134,6 +134,7 @@ export default class RegisterView extends React.Component {
 
                         <div className="col-md-12">
                             <TextField
+                                className="add-server-txts"
                                 hintText="Name"
                                 floatingLabelText="Name"
                                 type="text"
@@ -143,6 +144,7 @@ export default class RegisterView extends React.Component {
                         </div>
                         <div className="col-md-12">
                             <TextField
+                                className="add-server-txts"
                                 hintText="Email"
                                 floatingLabelText="Email"
                                 type="email"
@@ -152,6 +154,7 @@ export default class RegisterView extends React.Component {
                         </div>
                         <div className="col-md-12">
                             <TextField
+                                className="add-server-txts"
                                 hintText="Password"
                                 floatingLabelText="Password"
                                 type="password"
@@ -166,6 +169,7 @@ export default class RegisterView extends React.Component {
                             // disabled={this.state.disabled}
                             style={{ marginTop: 50 }}
                             label="Submit"
+                            className="act-btn"
                             onClick={(e) => this.login(e)}
                         />
                     </div>
